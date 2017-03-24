@@ -7,42 +7,58 @@
 #include <ArduinoHardware.h>
 #include <std_msgs/Int16.h>
 #include <IRremote.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_HMC5883_U.h>
 ros::NodeHandle  nh;
 
-std_msgs::Int16 str_msg;
+Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
+
+//std_msgs::Int16 str_msg;
 double V = 0, H = 0;
 Servo motor_H, motor_V;        // Definierar "servon"
 
 //ros::Publisher chatter("chatter", &str_msg);
 
-void servo_cb1( const std_msgs::Int16& cmd_msg1)
+void servo_cb1( const std_msgs::Int16& cmd_msg1)            // Styrning av höger motor
 {
   H = map(cmd_msg1.data, -100, 100, -495, 495);             // Mappar om insignalen (+-100) till det önskade intervallet (+-495) [map(value, fromLow, fromHigh, toLow, toHigh)]
-  motor_H.writeMicroseconds(1500 - H);                      //set servo pwm width
-  digitalWrite(13, HIGH - digitalRead(13));                 //toggle led
+  motor_H.writeMicroseconds(1500 - H);                      // set servo pwm width
 }
 
-void servo_cb2( const std_msgs::Int16& cmd_msg2)
+void servo_cb2( const std_msgs::Int16& cmd_msg2)            // Styrning av vänster motor
 {
   V = map(cmd_msg2.data, -100, 100, -495, 495);             // Mappar om insignalen
-  motor_V.writeMicroseconds(1500 + V);                      //set servo pwm width
-  digitalWrite(13, HIGH - digitalRead(13));                 //toggle led
+  motor_V.writeMicroseconds(1500 + V);                      // set servo pwm width
 }
 
-ros::Subscriber<std_msgs::Int16> sub1("motor_H", servo_cb1);
-ros::Subscriber<std_msgs::Int16> sub2("motor_V", servo_cb2);
+void servo_cb3( const std_msgs::Int16& cmd_msg3)            // Stoppsignal
+{
+  if (cmd_msg3.data)
+  {
+    motor_H.writeMicroseconds(1500);                        // Stoppar båda motorerna då en 1:a skickas
+    motor_V.writeMicroseconds(1500);
+  }
+}
+
+ros::Subscriber<std_msgs::Int16> sub1("motor_H", servo_cb1);  // Subscribe till styrning av höger motor
+ros::Subscriber<std_msgs::Int16> sub2("motor_V", servo_cb2);  // Subscribe till styrning av vänster motor
+ros::Subscriber<std_msgs::Int16> sub3("stop", servo_cb3);     // Subscribe till STOP
+
 std_msgs::Int16 spdH_msg;
 std_msgs::Int16 spdV_msg;
 ros::Publisher pub_spdH("speedH", &spdH_msg);
 ros::Publisher pub_spdV("speedV", &spdV_msg);
 
-int fram = 16736925;     // Pilknapp framåt
-int ok = 16712445;       // Mittenknapp
-int forts = 4294967295;  // Vid nedtryckt knapp
-volatile byte countH = 0; // Räknar antal pulser på höger sida
-volatile byte countV = 0; // Räknar antal pulser på vänster sida
-int speedH = 0;          // Hastighet höger sida
-int speedV = 0;          // Hastighet vänster sida
+std_msgs::Int16 heading_msg;
+ros::Publisher pub_heading("heading", &heading_msg);
+
+float fram = 16736925;      // Pilknapp framåt
+float ok = 16712445;        // Mittenknapp
+float forts = 4294967295;   // Vid nedtryckt knapp
+volatile int countH = 0; // Räknar antal pulser på höger sida
+volatile int countV = 0; // Räknar antal pulser på vänster sida
+float heading = 0;        // Riktning
 
 
 IRrecv irrecv(11);    // Tar emot IR-signaler på pin 11
@@ -55,12 +71,12 @@ void setup()
 
   nh.subscribe(sub1);
   nh.subscribe(sub2);
+  nh.subscribe(sub3);
 
   nh.advertise(pub_spdH);
   nh.advertise(pub_spdV);
+  nh.advertise(pub_heading);
 
-
-  //Serial.begin(9600);   // Om vi vill skriva något till serial monitor
   irrecv.enableIRIn();  // Startar IR-mottagaren
 
   motor_H.attach(9);    // Ansluter höger motor på pin 9
@@ -71,25 +87,43 @@ void setup()
 
   pinMode(2, INPUT);  // Insignal för höger impulsgivare
   pinMode(3, INPUT);  // Insignal för vänster impulsgivare
-  attachInterrupt(digitalPinToInterrupt(2), right, RISING); // Skapar interrupt för stigande flank på pulsen
+  attachInterrupt(digitalPinToInterrupt(2), right, RISING); // Skapar interrupt för räkna antal pulser
   attachInterrupt(digitalPinToInterrupt(3), left, RISING);
-  
+
 }
 long publisher_timer;
 
 void loop()
 {
-if (millis() > publisher_timer) {
-    // steg 1: kontrollera antal pulser sen senast och konvertera till hastighet
-    speedH = (countH * 1000 / (1000 + millis() - publisher_timer));   // Antal pulser per sekund
-    speedV = (countV * 1000 / (1000 + millis() - publisher_timer));
-    speedH = speedH;    // Justering för antal pulser per meter
-    speedV = speedV;
-    //------------------------------------------------Kod måste läggas till för att kunna läsa encodrarna
-    spdH_msg.data = speedH;
-    spdV_msg.data = speedV;
+  if (millis() > publisher_timer) {
+    // steg 1: kontrollera antal pulser sen senast och konvertera till vinkelhastighet (rad/s)
+    spdH_msg.data = (countH * 1000 / (1000 + millis() - publisher_timer))/365;   // Antal pulser per sekund, 365 pulser per hjulvarv
+    spdV_msg.data = (countV * 1000 / (1000 + millis() - publisher_timer))/365;
+
+    // steg 2: publicera vinkelhastigheten
     pub_spdH.publish(&spdH_msg);
     pub_spdV.publish(&spdV_msg);
+
+    // hämta kompassriktning
+    sensors_event_t event;
+    mag.getEvent(&event);
+
+    // beräkna riktning
+    heading = atan2(event.magnetic.y, event.magnetic.x);
+    
+    float declinationAngle = 0.0567;  // Korrigerar för avvikelse mellan magnetfältet och norr
+    heading += declinationAngle;
+    
+    if(heading < 0)     // Korrigera tecken
+      heading += 2*PI;
+
+    if(heading > 2*PI)  // Kontrollera så att vinkeln inte blivit för stor efter korrigering
+      heading -= 2*PI;
+
+    heading_msg.data = heading * 180/M_PI;   // Gör om från radianer till grader
+
+    // publicera riktning
+    pub_heading.publish(&heading_msg);
 
     countH = 0;   // Nollställer räknare
     countV = 0;
@@ -110,13 +144,12 @@ if (millis() > publisher_timer) {
         irrecv.resume();                    // Förbereder för att ta emot nästa värde
         delay(100);                         // Paus 100ms för att hinna starta om IR
         irrecv.decode(&results);            // Tar emot nästa värde
-
-        Serial.println("Nödstopp aktiv");   // Skriver ut att nödstoppen är aktiv i serial monitor
       }
       irrecv.resume();                      // Tar emot nästa värde
     }
   }
 }
+
 void right() {        // Ökar räknaren för höger sida med ett för varje puls
   countH = ++countH;
 }
