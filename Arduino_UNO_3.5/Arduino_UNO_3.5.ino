@@ -29,7 +29,11 @@ void servo_cb2( const std_msgs::Float64& cmd_msg2)                // Styrning av
 
 void servo_cb3( const std_msgs::Bool& cmd_msg3)                   // Stoppsignal
 {
-  bool halt = cmd_msg3.data;                                     //Läser in värdet från topicen till en lokal variabel
+  if (cmd_msg3.data) 
+  {
+    motor_H.writeMicroseconds(1500);                        // Stoppar båda motorerna ifall vi får stopsignal
+    motor_V.writeMicroseconds(1500);
+  }                      
 }
 
 ros::Subscriber<std_msgs::Float64> sub1("motor_H", servo_cb1);  // Subscribe till styrning av höger motor
@@ -41,6 +45,9 @@ std_msgs::Float64 spdV_msg;
 ros::Publisher pub_spdH("speedH", &spdH_msg);
 ros::Publisher pub_spdV("speedV", &spdV_msg);
 
+std_msgs::Bool test_msg;
+ros::Publisher pub_test("test", &test_msg);
+
 //std_msgs::Float64 heading_msg;
 //ros::Publisher pub_heading("heading", &heading_msg);
 
@@ -50,7 +57,7 @@ float forts = 4294967295;   // Vid nedtryckt knapp
 volatile int countH = 0;    // Räknar antal pulser på höger sida
 volatile int countV = 0;    // Räknar antal pulser på vänster sida
 float heading = 0;          // Riktning
-bool halt = false;
+bool halt;
 
 //IRrecv irrecv(11);    // Tar emot IR-signaler på pin 11
 //decode_results results;
@@ -66,6 +73,7 @@ void setup()
 
   nh.advertise(pub_spdH);
   nh.advertise(pub_spdV);
+  nh.advertise(pub_test);
   //nh.advertise(pub_heading);
 
   //irrecv.enableIRIn();  // Startar IR-mottagaren
@@ -97,13 +105,9 @@ void loop()
     // steg 2: publicera vinkelhastigheten
     pub_spdH.publish(&spdH_msg);
     pub_spdV.publish(&spdV_msg);
-    
 
-  if (halt) 
-  {
-    motor_H.writeMicroseconds(1500);                        // Stoppar båda motorerna ifall vi får stopsignal
-    motor_V.writeMicroseconds(1500);
-  }
+
+
 /*
     // hämta kompassriktning
     sensors_event_t event;
