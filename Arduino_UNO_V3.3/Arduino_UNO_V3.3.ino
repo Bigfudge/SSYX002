@@ -102,7 +102,7 @@ void loop()
     // steg 2: publicera vinkelhastigheten
     pub_spdH.publish(&spdH_msg);
     pub_spdV.publish(&spdV_msg);
-
+/*
     // hämta kompassriktning
     sensors_event_t event;
     mag.getEvent(&event);
@@ -123,7 +123,7 @@ void loop()
 
     // publicera riktning
     pub_heading.publish(&heading_msg);
-
+*/
     countH = 0;   // Nollställer räknare
     countV = 0;
     publisher_timer = millis() + 1000; // Publisera en gång per sekund
