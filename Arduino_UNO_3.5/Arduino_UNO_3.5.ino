@@ -18,13 +18,13 @@ Servo motor_H, motor_V;        // Definierar "servon"
 void servo_cb1( const std_msgs::Float64& cmd_msg1)                  // Styrning av höger motor
 {
   H = map(cmd_msg1.data, -100, 100, -495, 495);                    // Mappar om insignalen (+-100) till det önskade intervallet (+-495) [map(value, fromLow, fromHigh, toLow, toHigh)]
-  motor_H.writeMicroseconds(1500 - H*9*(0.87)-90);                      // set servo pwm width
+  motor_H.writeMicroseconds(1500 - 0.87*((H*9-90)*(2*PI/365)));                      // set servo pwm width
 }
 
 void servo_cb2( const std_msgs::Float64& cmd_msg2)                // Styrning av vänster motor
 {
   V = map(cmd_msg2.data, -100, 100, -495, 495);                   // Mappar om insignalen
-  motor_V.writeMicroseconds(1500 + 9*V-90);                            // set servo pwm width
+  motor_V.writeMicroseconds(1500 + (V*9-90)*(2*PI/365));                            // set servo pwm width
 }
 
 void servo_cb3( const std_msgs::Bool& cmd_msg3)                   // Stoppsignal
@@ -100,8 +100,8 @@ void loop()
   if (millis() > publisher_timer) {
     // steg 1: kontrollera antal pulser sen senast och konvertera till vinkelhastighet (rad/s)
     
-    spdH_msg.data = countH/(365*2*PI);   // 365 pulser/varv => antal varv, ett varv = 2PI rad => rad
-    spdV_msg.data = countV/(365*2*PI);
+    spdH_msg.data = countH*2*PI/365;   // 365 pulser/varv => antal varv, ett varv = 2PI rad => rad
+    spdV_msg.data = countV*2*PI/365;
 
     // steg 2: publicera vinkelhastigheten
     pub_spdH.publish(&spdH_msg);
