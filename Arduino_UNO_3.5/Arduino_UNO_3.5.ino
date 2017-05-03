@@ -12,19 +12,19 @@ ros::NodeHandle  nh;
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
 std_msgs::Float64 str_msg;
-double V = 0, H = 0;
+double V = 0, H = 0, B=0;
 Servo motor_H, motor_V;        // Definierar "servon"
 
 void servo_cb1( const std_msgs::Float64& cmd_msg1)                  // Styrning av höger motor
 {
   H = map(cmd_msg1.data, -100, 100, -495, 495);                    // Mappar om insignalen (+-100) till det önskade intervallet (+-495) [map(value, fromLow, fromHigh, toLow, toHigh)]
-  motor_H.writeMicroseconds(1500 - 0.87*((H*9-90)*(2*PI/365)));                      // set servo pwm width
+  motor_H.writeMicroseconds(1500-H);                      // set servo pwm width
 }
 
 void servo_cb2( const std_msgs::Float64& cmd_msg2)                // Styrning av vänster motor
 {
-  V = map(cmd_msg2.data, -100, 100, -495, 495);                   // Mappar om insignalen
-  motor_V.writeMicroseconds(1500 + (V*9-90)*(2*PI/365));                            // set servo pwm width
+  V = map(cmd_msg2.data, -100, 100, -495, 495);
+  motor_V.writeMicroseconds(1500+V);                            // set servo pwm width
 }
 
 void servo_cb3( const std_msgs::Bool& cmd_msg3)                   // Stoppsignal

@@ -1,0 +1,8 @@
+prefix=/home/simonpersson/ROS-WorkSpace/devel
+
+Name: rosserial_arduino
+Description: Description of rosserial_arduino
+Version: 0.7.6
+Cflags: -I/home/simonpersson/ROS-WorkSpace/devel/include
+Libs: -L/home/simonpersson/ROS-WorkSpace/devel/lib 
+Requires: message_runtime

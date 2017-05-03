@@ -1,0 +1,8 @@
+prefix=/home/simonpersson/ROS-WorkSpace/install
+
+Name: rosserial_tivac
+Description: Description of rosserial_tivac
+Version: 0.7.6
+Cflags: 
+Libs: -L/home/simonpersson/ROS-WorkSpace/install/lib 
+Requires: 

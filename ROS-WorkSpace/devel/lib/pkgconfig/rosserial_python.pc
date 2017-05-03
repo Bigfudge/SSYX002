@@ -1,0 +1,8 @@
+prefix=/home/simonpersson/ROS-WorkSpace/devel
+
+Name: rosserial_python
+Description: Description of rosserial_python
+Version: 0.7.6
+Cflags: 
+Libs: -L/home/simonpersson/ROS-WorkSpace/devel/lib 
+Requires: 

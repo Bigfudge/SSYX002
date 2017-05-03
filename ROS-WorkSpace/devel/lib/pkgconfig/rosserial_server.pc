@@ -1,0 +1,8 @@
+prefix=/home/simonpersson/ROS-WorkSpace/devel
+
+Name: rosserial_server
+Description: Description of rosserial_server
+Version: 0.7.6
+Cflags: -I/home/simonpersson/ROS-WorkSpace/src/rosserial/rosserial_server/include
+Libs: -L/home/simonpersson/ROS-WorkSpace/devel/lib 
+Requires: roscpp rosserial_msgs topic_tools
