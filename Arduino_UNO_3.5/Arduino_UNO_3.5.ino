@@ -49,8 +49,8 @@ ros::Publisher pub_spdV("speedV", &spdV_msg);
 std_msgs::Bool test_msg;
 ros::Publisher pub_test("test", &test_msg);
 
-//std_msgs::Float64 heading_msg;
-//ros::Publisher pub_heading("heading", &heading_msg);
+std_msgs::Float64 heading_msg;
+ros::Publisher pub_heading("heading", &heading_msg);
 
 float fram = 16736925;      // Pilknapp framåt
 float ok = 16712445;        // Mittenknapp
@@ -95,8 +95,8 @@ long publisher_timer = 0;
 
 void loop()
 {
- // sensors_event_t event;
- // mag.getEvent(&event);
+  sensors_event_t event;
+  mag.getEvent(&event);
   if (millis() > publisher_timer) {
     // steg 1: kontrollera antal pulser sen senast och konvertera till vinkelhastighet (rad/s)
     
@@ -109,7 +109,7 @@ void loop()
 
 
 
-/*
+
     // hämta kompassriktning
     sensors_event_t event;
     mag.getEvent(&event);
@@ -130,7 +130,6 @@ void loop()
 
     // publicera riktning
     pub_heading.publish(&heading_msg);
-*/
     countH = 0;   // Nollställer räknare
     countV = 0;
     publisher_timer = millis() + 1000; // Publisera en gång per sekund
