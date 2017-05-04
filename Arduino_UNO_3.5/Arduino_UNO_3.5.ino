@@ -12,7 +12,7 @@ ros::NodeHandle  nh;
 
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
-double V = 0, H = 0
+double V = 0, H = 0;
 Servo motor_H, motor_V;        // Definierar "servon"
 
 void servo_cb1( const std_msgs::Float64& cmd_msg1)                  // Styrning av höger motor
@@ -46,8 +46,8 @@ std_msgs::Float64 spdV_msg;
 ros::Publisher pub_spdH("speedH", &spdH_msg);
 ros::Publisher pub_spdV("speedV", &spdV_msg);
 
-//std_msgs::Bool test_msg;
-//ros::Publisher pub_test("test", &test_msg);
+std_msgs::Float64 test_msg;
+ros::Publisher pub_test("test", &test_msg);
 
 std_msgs::Float64 heading_msg;
 ros::Publisher pub_heading("heading", &heading_msg);
@@ -69,14 +69,13 @@ void setup()
 {
   mag.begin();           // Startar kompassen
   nh.initNode();
-
   nh.subscribe(sub1);
   nh.subscribe(sub2);
   nh.subscribe(sub3);
 
   nh.advertise(pub_spdH);
   nh.advertise(pub_spdV);
-  //nh.advertise(pub_test);
+  nh.advertise(pub_test);
   nh.advertise(pub_heading);
 
   //irrecv.enableIRIn();  // Startar IR-mottagaren
@@ -97,8 +96,6 @@ long publisher_timer = 0;
 
 void loop()
 {
-    //sensors_event_t event;
-   // mag.getEvent(&event);
   if (millis() > publisher_timer) {
     // steg 1: kontrollera antal pulser sen senast och konvertera till vinkelhastighet (rad/s)
     
@@ -109,8 +106,12 @@ void loop()
     pub_spdH.publish(&spdH_msg);
     pub_spdV.publish(&spdV_msg);
 
-
-    // hämta kompassriktning
+    countH = 0;   // Nollställer räknare
+    countV = 0;
+    publisher_timer = millis() + 1000; // Publisera en gång per sekund 
+    
+  
+       // hämta kompassriktning
     sensors_event_t event;
     mag.getEvent(&event);
 
@@ -125,24 +126,22 @@ void loop()
 
     if (heading > 2 * PI) // Kontrollera så att vinkeln inte blivit för stor efter korrigering
       heading -= 2 * PI;
+      
 
-    /*
-    if(firstTime){
+    
+    /*if(firstTime){
       vinkelKorrigering = heading * 180 / M_PI;
       firstTime=false;
-    }
-*/
-    heading_msg.data = (heading * 180 / M_PI); // Gör om från radianer till grader
     
+    }*/
+
+    heading_msg.data = ((heading * 180 / M_PI)); // Gör om från radianer till grader
     // publicera riktning
     pub_heading.publish(&heading_msg);
-    
-    countH = 0;   // Nollställer räknare
-    countV = 0;
-    publisher_timer = millis() + 1000; // Publisera en gång per sekund 
-     
-    }
+  }
     nh.spinOnce(); 
+  
+  
 }
 
 void right() {        // Ökar räknaren för höger sida med ett för varje puls
