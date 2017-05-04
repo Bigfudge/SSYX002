@@ -1,8 +1,0 @@
-prefix=/home/simonpersson/ROS-WorkSpace/install
-
-Name: rosserial_mbed
-Description: Description of rosserial_mbed
-Version: 0.7.6
-Cflags: -I/home/simonpersson/ROS-WorkSpace/install/include
-Libs: -L/home/simonpersson/ROS-WorkSpace/install/lib 
-Requires: message_runtime

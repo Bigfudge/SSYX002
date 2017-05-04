@@ -1,8 +1,0 @@
-prefix=/home/simonpersson/ROS-WorkSpace/install
-
-Name: snow
-Description: Description of snow
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/simonpersson/ROS-WorkSpace/install/lib 
-Requires: 

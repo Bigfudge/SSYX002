@@ -7,12 +7,12 @@
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_HMC5883_U.h>
+
 ros::NodeHandle  nh;
 
 Adafruit_HMC5883_Unified mag = Adafruit_HMC5883_Unified(12345);
 
-std_msgs::Float64 str_msg;
-double V = 0, H = 0, B=0;
+double V = 0, H = 0
 Servo motor_H, motor_V;        // Definierar "servon"
 
 void servo_cb1( const std_msgs::Float64& cmd_msg1)                  // Styrning av höger motor
@@ -136,6 +136,7 @@ void loop()
     
     // publicera riktning
     pub_heading.publish(&heading_msg);
+    
     countH = 0;   // Nollställer räknare
     countV = 0;
     publisher_timer = millis() + 1000; // Publisera en gång per sekund 

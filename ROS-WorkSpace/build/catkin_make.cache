@@ -1,2 +1,0 @@
-snow
--DCATKIN_DEVEL_PREFIX=/home/simonpersson/SSYX002/ROS-WorkSpace/devel -DCMAKE_INSTALL_PREFIX=/home/simonpersson/SSYX002/ROS-WorkSpace/install -G Unix Makefiles

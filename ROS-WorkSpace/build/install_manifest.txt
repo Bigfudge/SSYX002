@@ -1,6 +1,0 @@
-/home/simonpersson/ROS-WorkSpace/install/_setup_util.py
-/home/simonpersson/ROS-WorkSpace/install/env.sh
-/home/simonpersson/ROS-WorkSpace/install/setup.bash
-/home/simonpersson/ROS-WorkSpace/install/setup.sh
-/home/simonpersson/ROS-WorkSpace/install/setup.zsh
-/home/simonpersson/ROS-WorkSpace/install/.rosinstall
