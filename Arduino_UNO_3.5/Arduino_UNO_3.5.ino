@@ -46,8 +46,8 @@ std_msgs::Float64 spdV_msg;
 ros::Publisher pub_spdH("speedH", &spdH_msg);
 ros::Publisher pub_spdV("speedV", &spdV_msg);
 
-std_msgs::Bool test_msg;
-ros::Publisher pub_test("test", &test_msg);
+//std_msgs::Bool test_msg;
+//ros::Publisher pub_test("test", &test_msg);
 
 std_msgs::Float64 heading_msg;
 ros::Publisher pub_heading("heading", &heading_msg);
@@ -58,7 +58,9 @@ float forts = 4294967295;   // Vid nedtryckt knapp
 volatile int countH = 0;    // Räknar antal pulser på höger sida
 volatile int countV = 0;    // Räknar antal pulser på vänster sida
 float heading = 0;          // Riktning
+float firstTime = true;
 bool halt;
+float vinkelKorrigering = 0;
 
 //IRrecv irrecv(11);    // Tar emot IR-signaler på pin 11
 //decode_results results;
@@ -74,8 +76,8 @@ void setup()
 
   nh.advertise(pub_spdH);
   nh.advertise(pub_spdV);
-  nh.advertise(pub_test);
-  //nh.advertise(pub_heading);
+  //nh.advertise(pub_test);
+  nh.advertise(pub_heading);
 
   //irrecv.enableIRIn();  // Startar IR-mottagaren
 
@@ -95,8 +97,8 @@ long publisher_timer = 0;
 
 void loop()
 {
-  sensors_event_t event;
-  mag.getEvent(&event);
+    //sensors_event_t event;
+   // mag.getEvent(&event);
   if (millis() > publisher_timer) {
     // steg 1: kontrollera antal pulser sen senast och konvertera till vinkelhastighet (rad/s)
     
@@ -106,8 +108,6 @@ void loop()
     // steg 2: publicera vinkelhastigheten
     pub_spdH.publish(&spdH_msg);
     pub_spdV.publish(&spdV_msg);
-
-
 
 
     // hämta kompassriktning
@@ -126,33 +126,22 @@ void loop()
     if (heading > 2 * PI) // Kontrollera så att vinkeln inte blivit för stor efter korrigering
       heading -= 2 * PI;
 
-    heading_msg.data = heading * 180 / M_PI; // Gör om från radianer till grader
-
+    /*
+    if(firstTime){
+      vinkelKorrigering = heading * 180 / M_PI;
+      firstTime=false;
+    }
+*/
+    heading_msg.data = (heading * 180 / M_PI); // Gör om från radianer till grader
+    
     // publicera riktning
     pub_heading.publish(&heading_msg);
     countH = 0;   // Nollställer räknare
     countV = 0;
-    publisher_timer = millis() + 1000; // Publisera en gång per sekund
-  }
-
-  nh.spinOnce();
-
-  /*if (irrecv.decode(&results))  // När det kommer en IR-signal
-    {
-    if (results.value == ok)    // Nödstopp när man trycker på mittenknappen, nollställs genom att trycka pil upp.
-    {
-      while (results.value != fram)
-      {
-        motor_H.writeMicroseconds(1500);    // Stannar båda motorerna
-        motor_V.writeMicroseconds(1500);
-
-        irrecv.resume();                    // Förbereder för att ta emot nästa värde
-        delay(100);                         // Paus 100ms för att hinna starta om IR
-        irrecv.decode(&results);            // Tar emot nästa värde
-      }
-      irrecv.resume();                      // Tar emot nästa värde
+    publisher_timer = millis() + 1000; // Publisera en gång per sekund 
+     
     }
-    }*/
+    nh.spinOnce(); 
 }
 
 void right() {        // Ökar räknaren för höger sida med ett för varje puls
