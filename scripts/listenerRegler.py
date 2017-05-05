@@ -2,10 +2,13 @@
 # 
 
 import rospy
-from std_msgs.msg import Bool
+from std_msgs.msg import Float32
 
-def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + 'Data: :  %i', data.data)
+def callback_V(data):
+    rospy.loginfo(rospy.get_caller_id() + 'Vanster motor :  %i', data.data)
+
+def callback_H(data):
+    rospy.loginfo(rospy.get_caller_id() + 'Hoger motor :  %i', data.data)
 
 def listener():
 
@@ -14,9 +17,10 @@ def listener():
     # anonymous=True flag means that rospy will choose a unique
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
+    rospy.init_node('listenerRegler', anonymous=True)
 
-    rospy.Subscriber('stop', Bool, callback)
+    rospy.Subscriber('motor_H', Float32, callback_H)
+    rospy.Subscriber('motor_V', Float32, callback_V)
 
     # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()

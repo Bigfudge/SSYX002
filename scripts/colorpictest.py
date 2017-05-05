@@ -18,6 +18,7 @@ while True:
 
     # Read webcam image
     ret, frame = cap.read()
+    #cv2.imshow('Original', frame)
 
     # Convert image from RBG/BGR to HSV so we easily filter
     hsv_img = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -31,7 +32,7 @@ while True:
 
 
 
-    #cv2.imshow('Original', frame)
+
     cv2.imshow('mask', mask)
     cv2.imshow('Filtered Color Only', res)
     if cv2.waitKey(1) == 13:  # 13 is the Enter Key

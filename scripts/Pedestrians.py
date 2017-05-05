@@ -6,7 +6,7 @@ body_classifier = cv2.CascadeClassifier('./Haarcascades/haarcascade_lowerbody.xm
 cap = cv2.VideoCapture(0)
 pub2 = rospy.Publisher('stop', Bool, queue_size=10)
 rospy.init_node('talker', anonymous=True)
-rate = rospy.Rate(30) # 10hz
+rate = rospy.Rate(10) # 10hz
 
 
 class Stack:
@@ -38,10 +38,12 @@ class Stack:
 
 
 count = Stack()
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640,480))
 
 while True:
     ret, frame = cap.read()
-    frame = cv2.resize(frame, None, fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+    frame = cv2.resize(frame, None, fx=1, fy=1, interpolation=cv2.INTER_LINEAR)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     bodies = body_classifier.detectMultiScale(gray, 1.2, 4)
     if len(bodies) > 0:
@@ -51,16 +53,19 @@ while True:
         count.push(0)
         count.pop()
 
-    if count.sum() >= 5:
+    if count.sum() >= 3:
         pub2.publish(True)
-    else:
-        pub2.publish(False)
+        cv2.putText(frame, "stop", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 2.0, (0,255,0),3)
+    
+       
+
 
 
     for (x, y, w, h) in bodies:
         cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 255), 2)
 
     cv2.imshow('Pedestrians', frame)
+    out.write(frame)
     # print(stop)
     
     rate.sleep()

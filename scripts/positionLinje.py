@@ -11,7 +11,7 @@ import rospy
 from std_msgs.msg import Float32
 
 
-cap = cv2.VideoCapture(0) #change to cap = cv2.VideoCapture(0) for the camera instead
+cap = cv2.VideoCapture("line.mp4") #change to cap = cv2.VideoCapture(0) for the camera instead
 win = 0
 fail = 0
 
