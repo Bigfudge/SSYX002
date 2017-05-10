@@ -14,6 +14,7 @@ std_msgs::Float64 heading_msg;
 ros::Publisher pub_heading("heading", &heading_msg);
 
 float vinkelKorrigering = 0;
+float firstTime = true;
 float heading = 0;          // Riktning
 
 void setup()
@@ -45,7 +46,7 @@ void loop()
     if (heading > 2 * PI) // Kontrollera så att vinkeln inte blivit för stor efter korrigering
       heading -= 2 * PI;
 
-    /*if(firstTime){
+    if(firstTime){
       vinkelKorrigering = heading * 180 / M_PI;
       firstTime=false;
     
