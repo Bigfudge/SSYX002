@@ -11,7 +11,7 @@ def talker():
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(10) # 10hz
     while not rospy.is_shutdown():
-        hello_str = 3
+        hello_str = 30
         pub1.publish(hello_str)
         pub2.publish(hello_str)
         rate.sleep()

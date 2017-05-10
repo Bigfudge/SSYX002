@@ -5,7 +5,7 @@ from std_msgs.msg import Bool
 body_classifier = cv2.CascadeClassifier('./Haarcascades/haarcascade_lowerbody.xml')
 cap = cv2.VideoCapture(0)
 pub2 = rospy.Publisher('stop', Bool, queue_size=10)
-rospy.init_node('talker', anonymous=True)
+rospy.init_node('pedestrianStop', anonymous=True)
 rate = rospy.Rate(10) # 10hz
 
 

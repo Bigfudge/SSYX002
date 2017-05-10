@@ -33,7 +33,7 @@ KNOWN_HEIGHT = 0.21
 FOCAL_LENGTH = 700
 
 dist_Pub = rospy.Publisher('distSide_camshifttrack', Float64, queue_size=10)
-rospy.init_node('camshifttrack_Side', anonymous=True)
+rospy.init_node('camDist_Side', anonymous=True)
 rate = rospy.Rate(10) # 10hz
 
 #fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -65,7 +65,7 @@ while(1):
         distance = distance_to_camera(KNOWN_HEIGHT, FOCAL_LENGTH, track_window[3])-0.64
         #print(distance)
 
-        dist_Pub.publish(-1*distance)
+        dist_Pub.publish(distance)
         rate.sleep()
 
 
