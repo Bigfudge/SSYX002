@@ -66,7 +66,6 @@ while True:
 
     cv2.imshow('Pedestrians', frame)
     out.write(frame)
-    # print(stop)
     
     rate.sleep()
     if cv2.waitKey(1) == 13:
